@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2023-04-28T12:06:42Z</date>
+    <groups>
+        <group>
+            <name>Templates/Vigicorp</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template OVH NAS - Vigicorp</template>
+            <name>Template OVH NAS - Vigicorp</name>
+            <groups>
+                <group>
+                    <name>Templates/Vigicorp</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <name>NAS: Update Nas &amp; Partition</name>
+                    <key>OVHAPI.INFO.SQL[{$APPLICATION_KEY_NAS}, {$APPLICATION_SECRET_NAS}, {$CONSUMER_KEY_NAS}, {$SQL_HOST_NAS}, {$SQL_USER_NAS}, {$SQL_PASSWORD_NAS}, {$SQL_DATABASE_NAS}]</key>
+                    <delay>1d</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>List NAS OVH</name>
+                    <key>OVHAPI.NAS[{$APPLICATION_KEY}, {$APPLICATION_SECRET}, {$CONSUMER_KEY}]</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>NAS: Size of nas {#NAS}</name>
+                            <key>OVHAPI.NAS.INFO[{$APPLICATION_KEY_NAS}, {$APPLICATION_SECRET_NAS}, {$CONSUMER_KEY_NAS}, {#NAS}]</key>
+                            <delay>5m</delay>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.Capacity</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;=100-{$NAS_AVERAGE}</expression>
+                                    <name>Free disk space &lt;{$NAS_AVERAGE}% on NAS {#NAS}</name>
+                                    <url>https://www.ovh.com/manager/#/dedicated/nasha/{#NAS}</url>
+                                    <priority>AVERAGE</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Free disk space &lt;{$NAS_HIGH}% on NAS {#NAS}</name>
+                                            <expression>{Template OVH NAS - Vigicorp:OVHAPI.NAS.INFO[{$APPLICATION_KEY_NAS}, {$APPLICATION_SECRET_NAS}, {$CONSUMER_KEY_NAS}, {#NAS}].last()}&gt;=100-{$NAS_HIGH}</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;=100-{$NAS_DISASTER}</expression>
+                                    <name>Free disk space &lt;{$NAS_DISASTER}% on NAS {#NAS}</name>
+                                    <url>https://www.ovh.com/manager/#/dedicated/nasha/{#NAS}</url>
+                                    <priority>DISASTER</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;=100-{$NAS_HIGH}</expression>
+                                    <name>Free disk space &lt;{$NAS_HIGH}% on NAS {#NAS}</name>
+                                    <url>https://www.ovh.com/manager/#/dedicated/nasha/{#NAS}</url>
+                                    <priority>HIGH</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Free disk space &lt;{$NAS_DISASTER}% on NAS {#NAS}</name>
+                                            <expression>{Template OVH NAS - Vigicorp:OVHAPI.NAS.INFO[{$APPLICATION_KEY_NAS}, {$APPLICATION_SECRET_NAS}, {$CONSUMER_KEY_NAS}, {#NAS}].last()}&gt;=100-{$NAS_DISASTER}</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>NAS {#NAS} Space Disk</name>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <color>0080FF</color>
+                                    <item>
+                                        <host>Template OVH NAS - Vigicorp</host>
+                                        <key>OVHAPI.NAS.INFO[{$APPLICATION_KEY_NAS}, {$APPLICATION_SECRET_NAS}, {$CONSUMER_KEY_NAS}, {#NAS}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#NAS}</lld_macro>
+                            <path>$.NAS</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>List Partition on NAS OVH</name>
+                    <key>OVHAPI.PARTITION[{$APPLICATION_KEY_NAS}, {$APPLICATION_SECRET_NAS}, {$CONSUMER_KEY_NAS}]</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>NAS {#NAS}: Size of partition {#PARTITION}</name>
+                            <key>OVHAPI.PARTITION.INFO[{$APPLICATION_KEY}, {$APPLICATION_SECRET}, {$CONSUMER_KEY}, {#NAS}, {#PARTITION}]</key>
+                            <delay>5m</delay>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.Capacity</params>
+                                </step>
+                            </preprocessing>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;=100-{$PARTITION_AVERAGE}</expression>
+                                    <name>Free partition {#PARTITION} space &lt;{$PARTITION_AVERAGE}% on NAS {#NAS}</name>
+                                    <url>https://www.ovh.com/manager/#/dedicated/nasha/{#NAS}/partition/{#PARTITION}</url>
+                                    <priority>AVERAGE</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Free partition {#PARTITION} space &lt;{$PARTITION_HIGH}% on NAS {#NAS}</name>
+                                            <expression>{Template OVH NAS - Vigicorp:OVHAPI.PARTITION.INFO[{$APPLICATION_KEY}, {$APPLICATION_SECRET}, {$CONSUMER_KEY}, {#NAS}, {#PARTITION}].last()}&gt;=100-{$PARTITION_HIGH}</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;=100-{$PARTITION_DISASTER}</expression>
+                                    <name>Free partition {#PARTITION} space &lt;{$PARTITION_DISASTER}% on NAS {#NAS}</name>
+                                    <url>https://www.ovh.com/manager/#/dedicated/nasha/{#NAS}/partition/{#PARTITION}</url>
+                                    <priority>DISASTER</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;=100-{$PARTITION_HIGH}</expression>
+                                    <name>Free partition {#PARTITION} space &lt;{$PARTITION_HIGH}% on NAS {#NAS}</name>
+                                    <url>https://www.ovh.com/manager/#/dedicated/nasha/{#NAS}/partition/{#PARTITION}</url>
+                                    <priority>HIGH</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Free partition {#PARTITION} space &lt;{$PARTITION_DISASTER}% on NAS {#NAS}</name>
+                                            <expression>{Template OVH NAS - Vigicorp:OVHAPI.PARTITION.INFO[{$APPLICATION_KEY}, {$APPLICATION_SECRET}, {$CONSUMER_KEY}, {#NAS}, {#PARTITION}].last()}&gt;=100-{$PARTITION_DISASTER}</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>NAS {#NAS} : Partition {#PARTITION} Space Disk</name>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template OVH NAS - Vigicorp</host>
+                                        <key>OVHAPI.PARTITION.INFO[{$APPLICATION_KEY}, {$APPLICATION_SECRET}, {$CONSUMER_KEY}, {#NAS}, {#PARTITION}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#NAS}</lld_macro>
+                            <path>$.NAS</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#PARTITION}</lld_macro>
+                            <path>$.partition</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                </discovery_rule>
+            </discovery_rules>
+            <tags>
+                <tag>
+                    <tag>application</tag>
+                    <value>disk</value>
+                </tag>
+                <tag>
+                    <tag>cloud</tag>
+                    <value>nas</value>
+                </tag>
+                <tag>
+                    <tag>hosting</tag>
+                    <value>ovh</value>
+                </tag>
+            </tags>
+            <macros>
+                <macro>
+                    <macro>{$APPLICATION_KEY_NAS}</macro>
+                    <description>Set OVH application_key</description>
+                </macro>
+                <macro>
+                    <macro>{$APPLICATION_SECRET_NAS}</macro>
+                    <type>SECRET_TEXT</type>
+                    <description>Set OVH application_secret</description>
+                </macro>
+                <macro>
+                    <macro>{$CONSUMER_KEY_NAS}</macro>
+                    <type>SECRET_TEXT</type>
+                    <description>Set OVH consumer_key</description>
+                </macro>
+                <macro>
+                    <macro>{$NAS_AVERAGE}</macro>
+                    <value>10</value>
+                </macro>
+                <macro>
+                    <macro>{$NAS_DISASTER}</macro>
+                    <value>2</value>
+                </macro>
+                <macro>
+                    <macro>{$NAS_HIGH}</macro>
+                    <value>5</value>
+                </macro>
+                <macro>
+                    <macro>{$PARTITION_AVERAGE}</macro>
+                    <value>10</value>
+                </macro>
+                <macro>
+                    <macro>{$PARTITION_DISASTER}</macro>
+                    <value>2</value>
+                </macro>
+                <macro>
+                    <macro>{$PARTITION_HIGH}</macro>
+                    <value>5</value>
+                </macro>
+                <macro>
+                    <macro>{$SQL_DATABASE_NAS}</macro>
+                    <description>Set DB database name</description>
+                </macro>
+                <macro>
+                    <macro>{$SQL_HOST_NAS}</macro>
+                    <value>localhost</value>
+                    <description>Set DB host</description>
+                </macro>
+                <macro>
+                    <macro>{$SQL_PASSWORD_NAS}</macro>
+                    <type>SECRET_TEXT</type>
+                    <description>Set DB password</description>
+                </macro>
+                <macro>
+                    <macro>{$SQL_USER_NAS}</macro>
+                    <value>root</value>
+                    <description>Set DB user</description>
+                </macro>
+            </macros>
+            <screens>
+                <screen>
+                    <name>NAS Info</name>
+                    <hsize>1</hsize>
+                    <vsize>1</vsize>
+                    <screen_items>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>NAS {#NAS} Space Disk</name>
+                                <host>Template OVH NAS - Vigicorp</host>
+                            </resource>
+                            <width>425</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>0</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>1</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                    </screen_items>
+                </screen>
+                <screen>
+                    <name>Partition NAS Info</name>
+                    <hsize>1</hsize>
+                    <vsize>1</vsize>
+                    <screen_items>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>NAS {#NAS} : Partition {#PARTITION} Space Disk</name>
+                                <host>Template OVH NAS - Vigicorp</host>
+                            </resource>
+                            <width>425</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>0</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>1</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                    </screen_items>
+                </screen>
+            </screens>
+        </template>
+    </templates>
+</zabbix_export>
